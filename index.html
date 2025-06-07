@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>ALBA - Agua Viva</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <style>
+    :root {
+      --green-dark: #1b4332;
+      --green-medium: #2d6a4f;
+      --green-light: #95d5b2;
+      --white: #ffffff;
+      --blue-route: #1e88e5;
+      --red-leak: #e53935;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--white);
+      /* Fondo con la palabra "BACKGROUND" */
+      background: url("background.png") no-repeat center center fixed;
+      background-size: cover;
+      line-height: 1.6;
+      line-height: 1.6;
+      padding-bottom: 50px;
+    }
+
+    header {
+      background-color: rgba(29, 73, 53, 0.95);
+      padding: 15px 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .custom-logo {
+      height: 50px;
+      width: auto;
+      border-radius: 8px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .header-content h1 {
+      font-size: 1.6rem;
+      letter-spacing: 1px;
+      margin: 0;
+      color: var(--green-light);
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 15px;
+    }
+
+    .nav-links a {
+      color: var(--green-light);
+      text-decoration: none;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 5px;
+      transition: all 0.3s;
+      font-size: 0.9rem;
+    }
+
+    .nav-links a:hover {
+      background-color: rgba(149, 213, 178, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .lang-button {
+      display: block;
+      margin: 20px auto;
+      padding: 10px 24px;
+      font-size: 16px;
+      background-color: var(--green-light);
+      color: var(--green-dark);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-weight: 600;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .lang-button:hover {
+      background-color: #b7efc5;
+      transform: scale(1.05);
+    }
+
+    section {
+      max-width: 1200px;
+      margin: 30px auto;
+      padding: 25px;
+      background-color: rgba(43, 70, 56, 0.85);
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(149, 213, 178, 0.2);
+    }
+
+    section h2 {
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      color: var(--green-light);
+      position: relative;
+    }
+
+    section h2::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 80px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--green-light), transparent);
+      border-radius: 3px;
+    }
+
+    section p {
+      font-size: 1.1rem;
+      margin-bottom: 20px;
+      line-height: 1.8;
+    }
+
+    .image-container {
+      width: 100%;
+      margin-top: 20px;
+      text-align: center;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .image-container img {
+      max-width: 100%;
+      display: block;
+    }
+
+    #map {
+      height: 500px;
+      width: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+      margin-top: 15px;
+      border: 2px solid rgba(149, 213, 178, 0.3);
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin: 20px 0;
+      background: rgba(29, 53, 42, 0.7);
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid rgba(149, 213, 178, 0.2);
+    }
+
+    .control-group {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .control-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--green-light);
+    }
+
+    .control-group input, .control-group select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #2d6a4f;
+      background-color: rgba(255, 255, 255, 0.9);
+      font-family: inherit;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+      font-family: inherit;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-primary {
+      background-color: var(--green-light);
+      color: var(--green-dark);
+    }
+
+    .btn-primary:hover {
+      background-color: #b7efc5;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-secondary {
+      background-color: #5c7cfa;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background-color: #4c6ef5;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin: 20px 0;
+    }
+
+    .metric-card {
+      background: rgba(29, 53, 42, 0.7);
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+      border: 1px solid rgba(149, 213, 178, 0.2);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s;
+    }
+
+    .metric-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .metric-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--green-light);
+      margin: 10px 0;
+    }
+
+    .metric-label {
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    .chart-container {
+      height: 300px;
+      margin: 20px 0;
+      background: rgba(29, 53, 42, 0.7);
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid rgba(149, 213, 178, 0.2);
+    }
+
+    .legend {
+      display: flex;
+      gap: 15px;
+      margin: 15px 0;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 12px;
+      background: rgba(29, 53, 42, 0.7);
+      border-radius: 20px;
+      border: 1px solid rgba(149, 213, 178, 0.2);
+    }
+
+    .legend-color {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+    }
+
+    .route-info {
+      margin: 20px 0;
+      padding: 20px;
+      background: rgba(29, 53, 42, 0.7);
+      border-radius: 8px;
+      border: 1px solid rgba(149, 213, 178, 0.2);
+    }
+
+    .route-info h3 {
+      color: var(--green-light);
+      margin-bottom: 15px;
+      font-size: 1.4rem;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 20px;
+      color: var(--green-light);
+      font-size: 0.9rem;
+      margin-top: 30px;
+    }
+
+    .water-icon {
+      display: inline-block;
+      margin: 0 5px;
+      animation: waterDrop 2s infinite;
+    }
+
+    @keyframes waterDrop {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+      100% { transform: translateY(0); }
+    }
+
+    @media (max-width: 768px) {
+      header {
+        flex-direction: column;
+        padding: 15px;
+      }
+
+      .nav-links {
+        margin-top: 15px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .header-content h1 {
+        font-size: 1.4rem;
+      }
+
+      section {
+        padding: 15px;
+        margin: 20px 15px;
+      }
+
+      .controls {
+        flex-direction: column;
+      }
+
+      #map {
+        height: 400px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Encabezado con logo personalizado -->
+  <header>
+    <div class="header-content">
+      <div class="logo-container">
+        <!-- Logo personalizado -->
+        <img class="custom-logo" src="logo.png" alt="Logo personalizado">
+        <!-- Logo ALBA -->
+        <img class="custom-logo" src="achieved.png" alt="Logo ALBA">
+        <h1 id="title">ALBA - Agua Viva</h1>
+      </div>
+      <div class="nav-links">
+        <a href="#mission-section">Misión</a>
+        <a href="#optimizer-section">Optimizador</a>
+        <a href="#results-section">Resultados</a>
+        <a href="#analysis-section">Análisis</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Botón de idioma -->
+  <button class="lang-button" onclick="toggleLanguage()">Cambiar a inglés</button>
+
+  <!-- Misión -->
+  <section id="mission-section">
+    <h2 id="mission-title">Nuestra Misión</h2>
+    <p id="mission-text">
+      Desarrollar un sistema de planificación de infraestructura hidráulica, utilizando imágenes satelitales y análisis de datos para optimizar la construcción de tuberías y reducir pérdidas por fugas, con potencial de ser aplicado a otras regiones.
+    </p>
+    <div class="image-container">
+      <img src="https://images.unsplash.com/photo-1569336415962-a2bddaa1d9c1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Infraestructura hidráulica">
+    </div>
+  </section>
+
+  <!-- Optimizador de Rutas -->
+  <section id="optimizer-section">
+    <h2 id="optimizer-title">Optimizador de Rutas para Tuberías</h2>
+    <p id="optimizer-text">
+      Utiliza nuestra herramienta basada en algoritmos PSO (Optimización por Enjambre de Partículas) para encontrar la ruta óptima de tuberías considerando elevación, tipo de terreno y distancia.
+    </p>
+
+    <div class="controls">
+      <div class="control-group">
+        <label for="start-point">Punto de Inicio (Lat, Lng)</label>
+        <input type="text" id="start-point" value="19.4326, -99.1332">
+      </div>
+
+      <div class="control-group">
+        <label for="end-point">Punto de Fin (Lat, Lng)</label>
+        <input type="text" id="end-point" value="19.3400, -99.1170">
+      </div>
+
+      <div class="control-group">
+        <label for="terrain-type">Tipo de Terreno</label>
+        <select id="terrain-type">
+          <option value="flat">Plano</option>
+          <option value="hilly">Montañoso</option>
+          <option value="mixed" selected>Mixto</option>
+          <option value="urban">Urbano</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label for="pipe-diameter">Diámetro de Tubería (cm)</label>
+        <input type="number" id="pipe-diameter" value="30" min="10" max="100">
+      </div>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="setStartPoint()">Establecer Inicio en Mapa</button>
+      <button class="btn btn-primary" onclick="setEndPoint()">Establecer Fin en Mapa</button>
+      <button class="btn btn-secondary" onclick="calculateOptimalRoute()">Calcular Ruta Óptima</button>
+      <button class="btn btn-secondary" onclick="compareWithCurrent()">Comparar con Ruta Actual</button>
+    </div>
+
+    <div id="map"></div>
+
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: var(--blue-route);"></div>
+        <span id="legend-optimal">Ruta Óptima</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: #ff9800;"></div>
+        <span id="legend-current">Ruta Actual</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: var(--red-leak);"></div>
+        <span id="legend-leak">Zonas de Riesgo de Fugas</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Resultados y Métricas -->
+  <section id="results-section">
+    <h2 id="results-title">Resultados y Métricas</h2>
+
+    <div class="metrics">
+      <div class="metric-card">
+        <div class="metric-label">Longitud de Tubería</div>
+        <div class="metric-value" id="pipe-length">-- km</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Costo Estimado</div>
+        <div class="metric-value" id="estimated-cost">-- MXN</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Ahorro de Agua</div>
+        <div class="metric-value" id="water-saving">-- %</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Reducción de Pérdidas</div>
+        <div class="metric-value" id="leak-reduction">-- %</div>
+      </div>
+    </div>
+
+    <div class="route-info">
+      <h3 id="route-analysis-title">Análisis de Ruta</h3>
+      <p id="route-analysis">Seleccione puntos de inicio y fin, luego haga clic en "Calcular Ruta Óptima" para ver el análisis detallado.</p>
+    </div>
+
+    <div class="chart-container">
+      <canvas id="route-chart"></canvas>
+    </div>
+  </section>
+
+  <!-- Análisis de Datos -->
+  <section id="analysis-section">
+    <h2 id="analysis-title">Análisis de Datos Satelitales</h2>
+    <p id="analysis-text">
+      Nuestra plataforma integra datos de múltiples fuentes satelitales para proporcionar información detallada sobre humedad del suelo, vegetación y topografía.
+    </p>
+
+    <div class="image-container">
+      <img src="mexicoespacio.png" alt="Datos satelitales">
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <div class="footer">
+    <p>ALBA - Agua Viva <span class="water-icon">💧</span> Innovando para un futuro con agua sostenible</p>
+    <p>&copy; 2025 </p>
+  </div>
+
+  <!-- Script del sistema -->
+  <script>
+    let currentLang = "es";
+    let map;
+    let startMarker = null;
+    let endMarker = null;
+    let optimalRoute = null;
+    let currentRoute = null;
+    let leakZones = [];
+    let chart = null;
+
+    // Capas base
+    let trueColorLayer, ndviLayer, ndwiLayer;
+
+    // Configuración de Sentinel Hub
+    const instanceId = "5c3a46a0-0f68-480b-8454-7376706f82ba";
+    const sentinelBaseURL = `https://services.sentinel-hub.com/ogc/wms/${instanceId}`;
+
+    const commonOptions = {
+      format: "image/png",
+      transparent: true,
+      tileSize: 512,
+      maxcc: 20,
+      time: "2024-06-01/2025-06-05",
+      attribution: "Sentinel-2 &copy; Copernicus ESA",
+    };
+
+    // Inicializar el mapa
+    function initMap() {
+      map = L.map("map").setView([19.4326, -99.1332], 10);
+
+      // Capa base de OpenStreetMap
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(map);
+
+      // Capas de Sentinel Hub
+      trueColorLayer = L.tileLayer.wms(sentinelBaseURL, {
+        ...commonOptions,
+        layers: "TRUE_COLOR"
+      });
+
+      ndviLayer = L.tileLayer.wms(sentinelBaseURL, {
+        ...commonOptions,
+        layers: "NDVI"
+      });
+
+      ndwiLayer = L.tileLayer.wms(sentinelBaseURL, {
+        ...commonOptions,
+        layers: "NDWI"
+      });
+
+      // Control de capas
+      const baseLayers = {
+        "OpenStreetMap": L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; OpenStreetMap contributors'
+        }),
+        "Color Natural (TRUE_COLOR)": trueColorLayer,
+        "Vegetación (NDVI)": ndviLayer,
+        "Humedad (NDWI)": ndwiLayer
+      };
+
+      L.control.layers(baseLayers, {}, {collapsed: false}).addTo(map);
+
+      // Evento de clic en el mapa
+      map.on('click', function(e) {
+        const { lat, lng } = e.latlng;
+        L.popup()
+          .setLatLng(e.latlng)
+          .setContent(`📍<b>Lat:</b> ${lat.toFixed(5)}<br/><b>Lng:</b> ${lng.toFixed(5)}`)
+          .openOn(map);
+      });
+
+      // Inicializar gráfico
+      initChart();
+    }
+
+    // Inicializar gráfico de comparación
+    function initChart() {
+      const ctx = document.getElementById('route-chart').getContext('2d');
+      chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Longitud', 'Costo', 'Pérdidas', 'Tiempo'],
+          datasets: [{
+            label: 'Ruta Actual',
+            data: [0, 0, 0, 0],
+            backgroundColor: 'rgba(255, 152, 0, 0.7)',
+            borderColor: 'rgba(255, 152, 0, 1)',
+            borderWidth: 1
+          }, {
+            label: 'Ruta Óptima',
+            data: [0, 0, 0, 0],
+            backgroundColor: 'rgba(30, 136, 229, 0.7)',
+            borderColor: 'rgba(30, 136, 229, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Valor'
+              },
+              grid: {
+                color: 'rgba(149, 213, 178, 0.1)'
+              }
+            },
+            x: {
+              grid: {
+                color: 'rgba(149, 213, 178, 0.1)'
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              labels: {
+                color: '#95d5b2'
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // Establecer punto de inicio
+    function setStartPoint() {
+      map.on('click', function(e) {
+        if (startMarker) map.removeLayer(startMarker);
+        startMarker = L.marker(e.latlng, {
+          icon: new L.Icon({
+            iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41]
+          })
+        }).addTo(map).bindPopup('Punto de Inicio');
+        document.getElementById('start-point').value = `${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}`;
+        map.off('click');
+      });
+    }
+
+    // Establecer punto de fin
+    function setEndPoint() {
+      map.on('click', function(e) {
+        if (endMarker) map.removeLayer(endMarker);
+        endMarker = L.marker(e.latlng, {
+          icon: new L.Icon({
+            iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41]
+          })
+        }).addTo(map).bindPopup('Punto de Fin');
+        document.getElementById('end-point').value = `${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}`;
+        map.off('click');
+      });
+    }
+
+    // Calcular ruta óptima
+    function calculateOptimalRoute() {
+      const startPoint = document.getElementById('start-point').value.split(',').map(Number);
+      const endPoint = document.getElementById('end-point').value.split(',').map(Number);
+
+      if (startPoint.length !== 2 || endPoint.length !== 2) {
+        alert("Por favor ingrese puntos de inicio y fin válidos.");
+        return;
+      }
+
+      // Simular cálculo de ruta óptima con algoritmo PSO
+      simulatePSO(startPoint, endPoint);
+    }
+
+    // Simular algoritmo PSO
+    function simulatePSO(start, end) {
+      // Limpiar rutas anteriores
+      if (optimalRoute) map.removeLayer(optimalRoute);
+      if (currentRoute) map.removeLayer(currentRoute);
+      leakZones.forEach(zone => map.removeLayer(zone));
+      leakZones = [];
+
+      // Crear ruta óptima (simulación)
+      const optimalPath = generateOptimalPath(start, end);
+      optimalRoute = L.polyline(optimalPath, {
+        color: 'var(--blue-route)',
+        weight: 6,
+        opacity: 0.9
+      }).addTo(map);
+
+      // Crear ruta actual (recta)
+      const currentPath = [start, end];
+      currentRoute = L.polyline(currentPath, {
+        color: '#ff9800',
+        weight: 4,
+        dashArray: '5, 10',
+        opacity: 0.7
+      }).addTo(map);
+
+      // Añadir zonas de riesgo de fugas
+      generateLeakZones(optimalPath);
+
+      // Calcular métricas
+      const optimalLength = calculatePathLength(optimalPath);
+      const currentLength = calculatePathLength(currentPath);
+
+      const costPerKm = 500000; // MXN por km
+      const optimalCost = optimalLength * costPerKm;
+      const currentCost = currentLength * costPerKm;
+
+      // Actualizar métricas
+      document.getElementById('pipe-length').textContent = `${optimalLength.toFixed(2)} km`;
+      document.getElementById('estimated-cost').textContent = `$${(optimalCost/1000000).toFixed(2)}M MXN`;
+      document.getElementById('water-saving').textContent = `~${(15 + Math.random() * 10).toFixed(1)}%`;
+      document.getElementById('leak-reduction').textContent = `~${(30 + Math.random() * 15).toFixed(1)}%`;
+
+      // Actualizar análisis
+      const terrainType = document.getElementById('terrain-type').value;
+      document.getElementById('route-analysis').textContent =
+        `La ruta óptima evita áreas de alto riesgo y reduce la longitud en ${(currentLength - optimalLength).toFixed(2)} km.
+        En terreno ${getTerrainName(terrainType)}, esto representa un ahorro de aproximadamente $${((currentCost - optimalCost)/1000000).toFixed(2)}M MXN.`;
+
+      // Actualizar gráfico
+      updateChart(optimalLength, currentLength, optimalCost, currentCost);
+    }
+
+    // Generar ruta óptima simulada
+    function generateOptimalPath(start, end) {
+      const path = [];
+      const steps = 20;
+
+      // Punto inicial
+      path.push([start[0], start[1]]);
+
+      // Generar puntos intermedios (simulando optimización)
+      for (let i = 1; i < steps; i++) {
+        const progress = i / steps;
+        const lat = start[0] + (end[0] - start[0]) * progress;
+        const lng = start[1] + (end[1] - start[1]) * progress;
+
+        // Añadir variación para simular optimización del terreno
+        const variation = (Math.sin(progress * Math.PI * 4) * 0.01) * (i % 2 === 0 ? 1 : -1);
+        path.push([lat + variation, lng - variation * 0.7]);
+      }
+
+      // Punto final
+      path.push([end[0], end[1]]);
+
+      return path;
+    }
+
+    // Generar zonas de riesgo de fugas
+    function generateLeakZones(path) {
+      // Simular algunas zonas de riesgo a lo largo de la ruta
+      for (let i = 0; i < path.length - 1; i += Math.floor(path.length / 5)) {
+        const point = path[i];
+        const leakZone = L.circle([point[0], point[1]], {
+          color: 'var(--red-leak)',
+          fillColor: 'var(--red-leak)',
+          fillOpacity: 0.2,
+          radius: 500 + Math.random() * 1000
+        }).addTo(map);
+
+        leakZones.push(leakZone);
+      }
+    }
+
+    // Calcular longitud de la ruta en km
+    function calculatePathLength(path) {
+      let length = 0;
+      for (let i = 1; i < path.length; i++) {
+        const p1 = path[i-1];
+        const p2 = path[i];
+        length += haversineDistance(p1[0], p1[1], p2[0], p2[1]);
+      }
+      return length;
+    }
+
+    // Fórmula de Haversine para calcular distancia entre puntos
+    function haversineDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371; // Radio de la Tierra en km
+      const dLat = deg2rad(lat2 - lat1);
+      const dLon = deg2rad(lon2 - lon1);
+      const a =
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+        Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return R * c;
+    }
+
+    function deg2rad(deg) {
+      return deg * (Math.PI/180);
+    }
+
+    // Comparar con ruta actual
+    function compareWithCurrent() {
+      if (!optimalRoute) {
+        alert("Primero calcule una ruta óptima.");
+        return;
+      }
+
+      // Destacar la ruta actual
+      currentRoute.setStyle({weight: 6, opacity: 1});
+      setTimeout(() => {
+        currentRoute.setStyle({weight: 4, opacity: 0.7});
+      }, 3000);
+    }
+
+    // Actualizar gráfico con datos
+    function updateChart(optimalLength, currentLength, optimalCost, currentCost) {
+      chart.data.datasets[0].data = [
+        currentLength,
+        currentCost / 1000000,
+        35 + Math.random() * 15,
+        120 + Math.random() * 30
+      ];
+
+      chart.data.datasets[1].data = [
+        optimalLength,
+        optimalCost / 1000000,
+        10 + Math.random() * 10,
+        80 + Math.random() * 20
+      ];
+
+      chart.update();
+    }
+
+    // Obtener nombre del terreno
+    function getTerrainName(type) {
+      const names = {
+        'flat': 'plano',
+        'hilly': 'montañoso',
+        'mixed': 'mixto',
+        'urban': 'urbano'
+      };
+      return names[type] || type;
+    }
+
+    // Cambiar idioma
+    function toggleLanguage() {
+      const button = document.querySelector(".lang-button");
+      const missionTitle = document.getElementById("mission-title");
+      const missionText = document.getElementById("mission-text");
+      const optimizerTitle = document.getElementById("optimizer-title");
+      const optimizerText = document.getElementById("optimizer-text");
+      const resultsTitle = document.getElementById("results-title");
+      const analysisTitle = document.getElementById("analysis-title");
+      const analysisText = document.getElementById("analysis-text");
+      const legendOptimal = document.getElementById("legend-optimal");
+      const legendCurrent = document.getElementById("legend-current");
+      const legendLeak = document.getElementById("legend-leak");
+      const routeAnalysisTitle = document.getElementById("route-analysis-title");
+      const routeAnalysis = document.getElementById("route-analysis");
+
+      if (currentLang === "es") {
+        // Cambiar a inglés
+        missionTitle.textContent = "Our Mission";
+        missionText.textContent = "Develop a water infrastructure planning system, using satellite images and data analysis to optimize pipeline construction and reduce losses due to leaks, with the potential to be applied to other regions.";
+        optimizerTitle.textContent = "Pipeline Route Optimizer";
+        optimizerText.textContent = "Use our PSO (Particle Swarm Optimization) algorithm-based tool to find the optimal pipeline route considering elevation, terrain type, and distance.";
+        resultsTitle.textContent = "Results and Metrics";
+        analysisTitle.textContent = "Satellite Data Analysis";
+        analysisText.textContent = "Our platform integrates data from multiple satellite sources to provide detailed information on soil moisture, vegetation, and topography.";
+        legendOptimal.textContent = "Optimal Route";
+        legendCurrent.textContent = "Current Route";
+        legendLeak.textContent = "Leak Risk Areas";
+        routeAnalysisTitle.textContent = "Route Analysis";
+        routeAnalysis.textContent = routeAnalysis.textContent.replace("La ruta óptima", "The optimal route").replace("km", "km").replace("MXN", "MXN");
+        button.textContent = "Switch to Spanish";
+        currentLang = "en";
+      } else {
+        // Cambiar a español
+        missionTitle.textContent = "Nuestra Misión";
+        missionText.textContent = "Desarrollar un sistema de planificación de infraestructura hidráulica, utilizando imágenes satelitales y análisis de datos para optimizar la construcción de tuberías y reducir pérdidas por fugas, con potencial de ser aplicado a otras regiones.";
+        optimizerTitle.textContent = "Optimizador de Rutas para Tuberías";
+        optimizerText.textContent = "Utiliza nuestra herramienta basada en algoritmos PSO (Optimización por Enjambre de Partículas) para encontrar la ruta óptima de tuberías considerando elevación, tipo de terreno y distancia.";
+        resultsTitle.textContent = "Resultados y Métricas";
+        analysisTitle.textContent = "Análisis de Datos Satelitales";
+        analysisText.textContent = "Nuestra plataforma integra datos de múltiples fuentes satelitales para proporcionar información detallada sobre humedad del suelo, vegetación y topografía.";
+        legendOptimal.textContent = "Ruta Óptima";
+        legendCurrent.textContent = "Ruta Actual";
+        legendLeak.textContent = "Zonas de Riesgo de Fugas";
+        routeAnalysisTitle.textContent = "Análisis de Ruta";
+        routeAnalysis.textContent = routeAnalysis.textContent.replace("The optimal route", "La ruta óptima").replace("km", "km").replace("MXN", "MXN");
+        button.textContent = "Cambiar a inglés";
+        currentLang = "es";
+      }
+    }
+
+    // Inicializar el mapa cuando la página cargue
+    window.onload = initMap;
+  </script>
+</body>
+</html>
