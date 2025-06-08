@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
       --green-dark: #1b4332;
@@ -241,10 +240,10 @@
       transform: scale(1.03);
     }
 
-    #map-section {
+    .map-section {
       padding: 0;
       height: calc(100vh - 150px);
-      max-height: 800px;
+      max-height: 700px;
       margin: 30px auto;
       display: flex;
       flex-direction: column;
@@ -253,13 +252,13 @@
       box-shadow: var(--shadow);
     }
 
-    #map-header {
+    .map-header {
       padding: 20px;
       background: rgba(29, 53, 42, 0.9);
       border-bottom: 1px solid rgba(149, 213, 178, 0.2);
     }
 
-    #map-header h2 {
+    .map-header h2 {
       margin-bottom: 15px;
     }
 
@@ -354,14 +353,41 @@
       box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
     }
 
-    #arcgis-container {
-      flex: 1;
+    .arcgis-container {
+      display: flex;
       width: 100%;
       position: relative;
       overflow: hidden;
+      flex-direction: column;
+      gap: 10px;
+      padding: 10px;
+      flex: 1;
     }
 
-    #arcgis-map {
+    .map-wrapper {
+      flex: 1;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(149, 213, 178, 0.3);
+      position: relative;
+    }
+
+    .map-title {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(29, 53, 42, 0.85);
+      padding: 8px 15px;
+      border-radius: 8px;
+      z-index: 100;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--green-light);
+      border: 1px solid rgba(149, 213, 178, 0.2);
+    }
+
+    .arcgis-map {
       width: 100%;
       height: 100%;
       border: none;
@@ -451,16 +477,6 @@
       color: var(--green-lighter);
     }
 
-    .chart-container {
-      height: 350px;
-      margin: 25px 0;
-      background: rgba(29, 53, 42, 0.7);
-      padding: 20px;
-      border-radius: 12px;
-      border: 1px solid rgba(149, 213, 178, 0.2);
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    }
-
     .route-info {
       margin: 25px 0;
       padding: 25px;
@@ -509,9 +525,177 @@
       100% { box-shadow: 0 0 0 0 rgba(149, 213, 178, 0); }
     }
 
+    /* Nuevos estilos para la sección de irrigación FAO */
+    .irrigation-form {
+      background: rgba(29, 53, 42, 0.7);
+      padding: 25px;
+      border-radius: 12px;
+      margin-top: 25px;
+      border: 1px solid rgba(149, 213, 178, 0.2);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .irrigation-form h3 {
+      color: var(--green-light);
+      margin-bottom: 20px;
+      font-size: 1.4rem;
+      position: relative;
+      padding-bottom: 10px;
+    }
+
+    .irrigation-form h3::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--green-light), transparent);
+      border-radius: 3px;
+    }
+
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      flex: 1;
+      min-width: 250px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--green-light);
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px 15px;
+      border-radius: 8px;
+      border: 1px solid #2d6a4f;
+      background-color: rgba(255, 255, 255, 0.95);
+      font-family: inherit;
+      font-size: 1rem;
+      box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .irrigation-results {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    .result-card {
+      background: rgba(29, 53, 42, 0.8);
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      border: 1px solid rgba(149, 213, 178, 0.3);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .result-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, var(--green-light), transparent);
+    }
+
+    .result-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--green-light);
+      margin: 15px 0;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .result-label {
+      font-size: 1rem;
+      opacity: 0.9;
+      letter-spacing: 0.5px;
+      color: var(--green-lighter);
+    }
+
+    /* Nuevos estilos para mapas individuales - MEJORADOS */
+    .map-section-individual {
+      padding: 0;
+      height: calc(90vh - 100px); /* Aumentada la altura */
+      max-height: 900px; /* Aumentada la altura máxima */
+      margin: 20px auto; /* Reducido el margen para aprovechar espacio */
+      display: flex;
+      flex-direction: column;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .map-section-individual .map-wrapper {
+      flex: 1;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(149, 213, 178, 0.3);
+      position: relative;
+      height: 80%; /* Mayor porcentaje para el mapa */
+    }
+
+    .map-section-individual .arcgis-map {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .map-description {
+      padding: 15px 20px; /* Padding reducido */
+      background: rgba(29, 53, 42, 0.9);
+      border-bottom: 1px solid rgba(149, 213, 178, 0.2);
+    }
+
+    .map-description h2 {
+      margin-bottom: 8px; /* Margen reducido */
+      font-size: 1.8rem; /* Tamaño ajustado */
+    }
+
+    .map-description p {
+      color: var(--green-lighter);
+      font-size: 1rem; /* Tamaño ajustado */
+      margin-bottom: 10px; /* Margen reducido */
+    }
+
+    .map-controls {
+      padding: 12px 15px; /* Padding reducido */
+      background: rgba(29, 53, 42, 0.85);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px; /* Espacio reducido */
+      border-top: 1px solid rgba(149, 213, 178, 0.2);
+    }
+
+    .map-controls .control-group {
+      min-width: 200px; /* Ancho ajustado */
+      margin-bottom: 0;
+    }
+
+    .map-controls .btn {
+      padding: 8px 15px; /* Padding reducido */
+    }
+
+    /* Optimización para dispositivos móviles */
     @media (max-width: 992px) {
-      #map-section {
-        height: calc(100vh - 100px);
+      .map-section-individual {
+        height: calc(85vh - 100px);
       }
     }
 
@@ -551,27 +735,73 @@
         bottom: 10px;
         max-width: none;
       }
+
+      .map-wrapper {
+        height: 300px;
+        margin-bottom: 15px;
+      }
+
+      .form-row {
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .nav-links a {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+      }
+
+      /* Optimización móvil para mapas */
+      .map-section-individual {
+        height: calc(80vh - 80px);
+        max-height: 600px;
+        margin: 10px auto;
+      }
+
+      .map-section-individual .map-wrapper {
+        height: 75%;
+      }
+
+      .map-description h2 {
+        font-size: 1.5rem;
+      }
+
+      .map-description p {
+        font-size: 0.9rem;
+      }
+
+      .map-controls {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .map-controls .control-group {
+        min-width: 100%;
+      }
     }
   </style>
 </head>
 <body>
   <div class="water-pattern"></div>
 
-  <!-- Encabezado del logo login logito logoso-->
+  <!-- Encabezado con logos y enlaces de navegación -->
   <header>
     <div class="header-content">
       <div class="logo-container">
-        <!-- Logo personalizado -->
+        <!-- LOGO PERSONALIZADO -->
         <img class="custom-logo" src="logo.PNG" alt="Logo personalizado">
-        <!-- Logo ALBA -->
+        <!-- LOGO ALBA -->
         <img class="custom-logo" src="achieved.png" alt="Logo ALBA">
         <h1 id="title">ALBA - Agua Viva</h1>
       </div>
+      <!-- ENLACES DE NAVEGACIÓN -->
       <div class="nav-links">
         <a href="#mission-section"><i class="fas fa-bullseye"></i> Misión</a>
-        <a href="#map-section"><i class="fas fa-map-marked-alt"></i> Mapa</a>
+        <a href="#satellite-map-section"><i class="fas fa-map-marked-alt"></i> Mapa Satelital</a>
+        <a href="#observation-map-section"><i class="fas fa-binoculars"></i> Mapa Observación</a>
         <a href="#results-section"><i class="fas fa-chart-line"></i> Resultados</a>
         <a href="#analysis-section"><i class="fas fa-satellite"></i> Análisis</a>
+        <a href="#irrigation-section"><i class="fas fa-calculator"></i> Irrigación FAO</a>
       </div>
     </div>
   </header>
@@ -590,59 +820,130 @@
     </div>
   </section>
 
-  <!-- Sección del Mapa - Ahora ocupa toda la sección -->
-  <section id="map-section">
-    <div id="map-header">
-      <h2 id="optimizer-title"><i class="fas fa-route"></i> Optimizador de Rutas para Tuberías</h2>
-      <p id="optimizer-text">
-        Utiliza nuestra herramienta integrada con ArcGIS para visualizar y analizar rutas de tuberías considerando elevación, tipo de terreno y distancia.
+  <!-- Sección individual para Mapa Satelital - AHORA MÁS GRANDE -->
+  <section id="satellite-map-section" class="map-section-individual">
+    <div class="map-description">
+      <h2><i class="fas fa-satellite"></i> Mapa Satelital</h2>
+      <p>
+        Visualice información geográfica detallada con nuestro mapa satelital de alta resolución. Explore características del terreno, vegetación y recursos hídricos con datos actualizados.
       </p>
-
-      <div id="map-controls">
-        <div class="control-group">
-          <label for="start-point"><i class="fas fa-map-marker-alt"></i> Punto de Inicio (Lat, Lng)</label>
-          <input type="text" id="start-point" value="19.4326, -99.1332">
-        </div>
-
-        <div class="control-group">
-          <label for="end-point"><i class="fas fa-flag-checkered"></i> Punto de Fin (Lat, Lng)</label>
-          <input type="text" id="end-point" value="19.3400, -99.1170">
-        </div>
-
-        <div class="control-group">
-          <label for="terrain-type"><i class="fas fa-mountain"></i> Tipo de Terreno</label>
-          <select id="terrain-type">
-            <option value="flat">Plano</option>
-            <option value="hilly">Montañoso</option>
-            <option value="mixed" selected>Mixto</option>
-            <option value="urban">Urbano</option>
-          </select>
-        </div>
-
-        <div class="control-group">
-          <label for="pipe-diameter"><i class="fas fa-pipe"></i> Diámetro de Tubería (cm)</label>
-          <input type="number" id="pipe-diameter" value="30" min="10" max="100">
-        </div>
-
-        <div class="btn-group">
-          <button class="btn btn-primary" onclick="setStartPoint()"><i class="fas fa-dot-circle"></i> Establecer Inicio</button>
-          <button class="btn btn-primary" onclick="setEndPoint()"><i class="fas fa-flag"></i> Establecer Fin</button>
-          <button class="btn btn-secondary" onclick="calculateOptimalRoute()"><i class="fas fa-calculator"></i> Calcular Ruta</button>
-          <button class="btn btn-secondary" onclick="compareWithCurrent()"><i class="fas fa-exchange-alt"></i> Comparar Rutas</button>
-        </div>
-      </div>
     </div>
 
-    <div id="arcgis-container">
-      <iframe id="arcgis-map"
+    <div class="map-controls">
+      <div class="control-group">
+        <label for="satellite-date"><i class="fas fa-calendar-alt"></i> Fecha de imagen</label>
+        <input type="date" id="satellite-date" value="2024-07-06">
+      </div>
+
+      <div class="control-group">
+        <label for="satellite-layer"><i class="fas fa-layer-group"></i> Capa de visualización</label>
+        <select id="satellite-layer">
+          <option value="ndvi">NDVI Colorizado</option>
+          <option value="natural">Color Natural</option>
+          <option value="infrared">Infrarrojo</option>
+          <option value="thermal">Térmico</option>
+        </select>
+      </div>
+
+      <button class="btn btn-primary" onclick="refreshSatelliteMap()">
+        <i class="fas fa-sync-alt"></i> Actualizar Vista
+      </button>
+    </div>
+
+    <div class="map-wrapper">
+      <div class="map-title">Mapa Satelital - Vista NDVI</div>
+      <iframe class="arcgis-map"
+              src="https://livingatlas.arcgis.com/landsatexplorer/#mapCenter=-98.17142%2C18.87102%2C14.000&mode=find+a+scene&mainScene=2024-07-06%7CNDVI+Colorized+for+Visualization%7C9330008"
+              frameborder="0"
+              allowfullscreen>
+      </iframe>
+    </div>
+  </section>
+
+  <!-- Sección individual para Mapa de Observación - AHORA MÁS GRANDE -->
+  <section id="observation-map-section" class="map-section-individual">
+    <div class="map-description">
+      <h2><i class="fas fa-binoculars"></i> Mapa de Observación</h2>
+      <p>
+        Monitoree en tiempo real las condiciones ambientales, recursos hídricos y características del terreno con nuestro mapa interactivo de observación.
+      </p>
+    </div>
+
+    <div class="map-controls">
+      <div class="control-group">
+        <label for="observation-filter"><i class="fas fa-filter"></i> Filtro de capas</label>
+        <select id="observation-filter">
+          <option value="all">Todas las capas</option>
+          <option value="water">Recursos hídricos</option>
+          <option value="terrain">Topografía</option>
+          <option value="vegetation">Vegetación</option>
+          <option value="infrastructure">Infraestructura</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label for="observation-opacity"><i class="fas fa-adjust"></i> Opacidad</label>
+        <input type="range" id="observation-opacity" min="0" max="100" value="80">
+      </div>
+
+      <button class="btn btn-primary" onclick="focusOnMexico()">
+        <i class="fas fa-search-location"></i> Enfocar en México
+      </button>
+
+      <button class="btn btn-secondary" onclick="toggleFullscreen('observation-map-section')">
+        <i class="fas fa-expand"></i> Pantalla Completa
+      </button>
+    </div>
+
+    <div class="map-wrapper">
+      <div class="map-title">Mapa de Observación - Vista Interactiva</div>
+      <iframe class="arcgis-map"
               src="https://unam-edu.maps.arcgis.com/apps/instant/observer/index.html?appid=a39cd80a70b04433afada7510a76fe96"
               frameborder="0"
               allowfullscreen>
-        No se admiten iFrames en esta página.
       </iframe>
+    </div>
+  </section>
 
+  <!-- Optimizador de Rutas -->
+  <section id="optimizer-section">
+    <h2 id="optimizer-title"><i class="fas fa-route"></i> Optimizador de Rutas para Tuberías</h2>
+    <p id="optimizer-text">
+      Utiliza nuestra herramienta integrada con ArcGIS para visualizar y analizar rutas de tuberías considerando elevación, tipo de terreno y distancia.
+    </p>
 
+    <div id="map-controls">
+      <div class="control-group">
+        <label for="start-point"><i class="fas fa-map-marker-alt"></i> Punto de Inicio (Lat, Lng)</label>
+        <input type="text" id="start-point" value="19.4326, -99.1332">
+      </div>
 
+      <div class="control-group">
+        <label for="end-point"><i class="fas fa-flag-checkered"></i> Punto de Fin (Lat, Lng)</label>
+        <input type="text" id="end-point" value="19.3400, -99.1170">
+      </div>
+
+      <div class="control-group">
+        <label for="terrain-type"><i class="fas fa-mountain"></i> Tipo de Terreno</label>
+        <select id="terrain-type">
+          <option value="flat">Plano</option>
+          <option value="hilly">Montañoso</option>
+          <option value="mixed" selected>Mixto</option>
+          <option value="urban">Urbano</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label for="pipe-diameter"><i class="fas fa-pipe"></i> Diámetro de Tubería (cm)</label>
+        <input type="number" id="pipe-diameter" value="30" min="10" max="100">
+      </div>
+
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="setStartPoint()"><i class="fas fa-dot-circle"></i> Establecer Inicio</button>
+        <button class="btn btn-primary" onclick="setEndPoint()"><i class="fas fa-flag"></i> Establecer Fin</button>
+        <button class="btn btn-secondary" onclick="calculateOptimalRoute()"><i class="fas fa-calculator"></i> Calcular Ruta</button>
+        <button class="btn btn-secondary" onclick="compareWithCurrent()"><i class="fas fa-exchange-alt"></i> Comparar Rutas</button>
+      </div>
     </div>
   </section>
 
@@ -673,9 +974,84 @@
       <h3 id="route-analysis-title"><i class="fas fa-chart-bar"></i> Análisis de Ruta</h3>
       <p id="route-analysis">Seleccione puntos de inicio y fin, luego haga clic en "Calcular Ruta Óptima" para ver el análisis detallado. La ruta óptima se calcula utilizando algoritmos avanzados que consideran múltiples factores como topografía, tipo de suelo y costos de construcción.</p>
     </div>
+  </section>
 
-    <div class="chart-container">
-      <canvas id="route-chart"></canvas>
+  <!-- Sección: Cálculos de Irrigación FAO -->
+  <section id="irrigation-section">
+    <h2><i class="fas fa-tint"></i> Cálculos de Irrigación FAO</h2>
+    <p>
+      Utilizamos la metodología de la FAO para determinar la distancia de irrigación necesaria para preservar el ecosistema, basado en parámetros climáticos, de suelo y vegetación.
+    </p>
+
+    <div class="irrigation-form">
+      <h3>Parámetros de Cálculo</h3>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="eto-input">Evapotranspiración de referencia (ETo) mm/día</label>
+          <input type="number" id="eto-input" value="4.2" step="0.1" min="0">
+        </div>
+
+        <div class="form-group">
+          <label for="kc-input">Coeficiente de cultivo (Kc)</label>
+          <input type="number" id="kc-input" value="0.4" step="0.1" min="0">
+        </div>
+
+        <div class="form-group">
+          <label for="zr-input">Profundidad radicular efectiva (Zr) m</label>
+          <input type="number" id="zr-input" value="0.4" step="0.1" min="0">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="p-input">Factor de agotamiento (p)</label>
+          <input type="number" id="p-input" value="0.3" step="0.01" min="0" max="1">
+        </div>
+
+        <div class="form-group">
+          <label for="eff-input">Eficiencia del riego (eff)</label>
+          <input type="number" id="eff-input" value="0.75" step="0.01" min="0" max="1">
+        </div>
+
+        <div class="form-group">
+          <label for="volumen-input">Volumen disponible (m³)</label>
+          <input type="number" id="volumen-input" value="100000" min="0">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="ancho-input">Ancho de franja (m)</label>
+          <input type="number" id="ancho-input" value="1.0" step="0.1" min="0">
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="calculateIrrigation()">
+        <i class="fas fa-calculator"></i> Calcular Irrigación
+      </button>
+    </div>
+
+    <div class="irrigation-results">
+      <div class="result-card">
+        <div class="result-label"><i class="fas fa-cloud"></i> Evapotranspiración (ETc)</div>
+        <div class="result-value" id="etc-value">-- mm/día</div>
+      </div>
+
+      <div class="result-card">
+        <div class="result-label"><i class="fas fa-seedling"></i> Agua Fácilmente Aprovechable (AFA)</div>
+        <div class="result-value" id="afa-value">-- mm</div>
+      </div>
+
+      <div class="result-card">
+        <div class="result-label"><i class="fas fa-ruler-combined"></i> Área Irrigable</div>
+        <div class="result-value" id="area-value">-- ha</div>
+      </div>
+
+      <div class="result-card">
+        <div class="result-label"><i class="fas fa-road"></i> Longitud de Franja</div>
+        <div class="result-value" id="longitud-value">-- m</div>
+      </div>
     </div>
   </section>
 
@@ -700,73 +1076,6 @@
   <!-- Script del sistema -->
   <script>
     let currentLang = "es";
-    let chart = null;
-
-    // Inicializar gráfico de comparación
-    function initChart() {
-      const ctx = document.getElementById('route-chart').getContext('2d');
-      chart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: ['Longitud (km)', 'Costo (millones MXN)', 'Pérdidas (%)', 'Tiempo (días)'],
-          datasets: [{
-            label: 'Ruta Actual',
-            data: [0, 0, 0, 0],
-            backgroundColor: 'rgba(255, 152, 0, 0.7)',
-            borderColor: 'rgba(255, 152, 0, 1)',
-            borderWidth: 1
-          }, {
-            label: 'Ruta Óptima',
-            data: [0, 0, 0, 0],
-            backgroundColor: 'rgba(30, 136, 229, 0.7)',
-            borderColor: 'rgba(30, 136, 229, 1)',
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            y: {
-              beginAtZero: true,
-              title: {
-                display: true,
-                text: 'Valor'
-              },
-              grid: {
-                color: 'rgba(149, 213, 178, 0.1)'
-              },
-              ticks: {
-                color: '#95d5b2'
-              }
-            },
-            x: {
-              grid: {
-                color: 'rgba(149, 213, 178, 0.1)'
-              },
-              ticks: {
-                color: '#95d5b2'
-              }
-            }
-          },
-          plugins: {
-            legend: {
-              labels: {
-                color: '#95d5b2'
-              }
-            },
-            title: {
-              display: true,
-              text: 'Comparación de Rutas',
-              color: '#95d5b2',
-              font: {
-                size: 18
-              }
-            }
-          }
-        }
-      });
-    }
 
     // Establecer punto de inicio
     function setStartPoint() {
@@ -809,33 +1118,6 @@
         `La ruta óptima evita áreas de alto riesgo y reduce la longitud en ${(currentLength - optimalLength).toFixed(2)} km.
         En terreno ${getTerrainName(terrainType)}, esto representa un ahorro de aproximadamente $${((currentLength - optimalLength) * costPerKm).toLocaleString('es-MX')} MXN.
         Además, se prevé una reducción del 30% en las pérdidas por fugas y un ahorro significativo en tiempo de construcción.`;
-
-      // Actualizar gráfico
-      updateChart(optimalLength, currentLength, optimalCost.replace(/,/g, ''), currentCost.replace(/,/g, ''));
-    }
-
-    // Actualizar gráfico con datos
-    function updateChart(optimalLength, currentLength, optimalCost, currentCost) {
-      chart.data.datasets[0].data = [
-        parseFloat(currentLength),
-        parseFloat(currentCost) / 1000000,
-        35 + Math.random() * 15,
-        120 + Math.random() * 30
-      ];
-
-      chart.data.datasets[1].data = [
-        parseFloat(optimalLength),
-        parseFloat(optimalCost) / 1000000,
-        10 + Math.random() * 10,
-        80 + Math.random() * 20
-      ];
-
-      chart.update();
-    }
-
-    // Comparar con ruta actual
-    function compareWithCurrent() {
-      alert("La función de comparación requiere que se calcule primero una ruta óptima. Utilizando nuestros algoritmos avanzados, podemos mostrar una comparación detallada entre la ruta actual y la propuesta.");
     }
 
     // Obtener nombre del terreno
@@ -849,6 +1131,60 @@
       return names[type] || type;
     }
 
+    // Comparar con ruta actual
+    function compareWithCurrent() {
+      alert("La función de comparación requiere que se calcule primero una ruta óptima. Utilizando nuestros algoritmos avanzados, podemos mostrar una comparación detallada entre la ruta actual y la propuesta.");
+    }
+
+    // Función para calcular la irrigación según FAO
+    function calculateIrrigation() {
+      // Obtener valores del formulario
+      const ETo = parseFloat(document.getElementById('eto-input').value);
+      const Kc = parseFloat(document.getElementById('kc-input').value);
+      const Zr = parseFloat(document.getElementById('zr-input').value);
+      const p = parseFloat(document.getElementById('p-input').value);
+      const eff = parseFloat(document.getElementById('eff-input').value);
+      const volumen_presapoblado = parseFloat(document.getElementById('volumen-input').value);
+      const ancho_franja = parseFloat(document.getElementById('ancho-input').value);
+
+      // Validar valores
+      if (isNaN(ETo)) return alert("ETo debe ser un número");
+      if (isNaN(Kc)) return alert("Kc debe ser un número");
+      if (isNaN(Zr)) return alert("Zr debe ser un número");
+      if (isNaN(p)) return alert("p debe ser un número");
+      if (isNaN(eff)) return alert("eff debe ser un número");
+      if (isNaN(volumen_presapoblado)) return alert("Volumen disponible debe ser un número");
+      if (isNaN(ancho_franja)) return alert("Ancho de franja debe ser un número");
+
+      // Calcular ETc
+      const ETc = Kc * ETo; // mm/día
+
+      // Contenido hídrico
+      const theta_fc = 0.30; // Capacidad de campo
+      const theta_pwp = 0.10; // Punto de marchitez
+      const ADT = 1000 * (theta_fc - theta_pwp) * Zr; // mm
+      const AFA = p * ADT; // mm
+
+      // Volumen de agua requerido por hectárea
+      const lamina_m3ha = AFA * 10; // m³/ha
+
+      // Área máxima irrigable (ha)
+      const area_ha = (volumen_presapoblado * eff) / lamina_m3ha;
+
+      // Conversión a m² y longitud de la franja
+      const area_m2 = area_ha * 10000;
+      const longitud_franja = area_m2 / ancho_franja;
+
+      // Mostrar resultados
+      document.getElementById('etc-value').textContent = `${ETc.toFixed(2)} mm/día`;
+      document.getElementById('afa-value').textContent = `${AFA.toFixed(2)} mm`;
+      document.getElementById('area-value').textContent = `${area_ha.toFixed(2)} ha`;
+      document.getElementById('longitud-value').textContent = `${longitud_franja.toFixed(2)} m`;
+
+      
+      `;
+    }
+
     // Cambiar idioma
     function toggleLanguage() {
       const button = document.querySelector(".lang-button");
@@ -859,11 +1195,12 @@
       const resultsTitle = document.getElementById("results-title");
       const analysisTitle = document.getElementById("analysis-title");
       const analysisText = document.getElementById("analysis-text");
-      const legendOptimal = document.getElementById("legend-optimal");
-      const legendCurrent = document.getElementById("legend-current");
-      const legendLeak = document.getElementById("legend-leak");
       const routeAnalysisTitle = document.getElementById("route-analysis-title");
       const routeAnalysis = document.getElementById("route-analysis");
+      const satelliteMapSection = document.querySelector("#satellite-map-section h2");
+      const observationMapSection = document.querySelector("#observation-map-section h2");
+      const satelliteMapDesc = document.querySelector("#satellite-map-section p");
+      const observationMapDesc = document.querySelector("#observation-map-section p");
 
       if (currentLang === "es") {
         // Cambiar a inglés
@@ -874,11 +1211,12 @@
         resultsTitle.innerHTML = '<i class="fas fa-chart-line"></i> Results and Metrics';
         analysisTitle.innerHTML = '<i class="fas fa-satellite"></i> Satellite Data Analysis';
         analysisText.textContent = "Our platform integrates data from multiple satellite sources to provide detailed information on soil moisture, vegetation, and topography. We use high-resolution images combined with machine learning algorithms to detect patterns and optimize infrastructure planning.";
-        legendOptimal.textContent = "Optimal Route";
-        legendCurrent.textContent = "Current Route";
-        legendLeak.textContent = "Risk Areas";
         routeAnalysisTitle.innerHTML = '<i class="fas fa-chart-bar"></i> Route Analysis';
         routeAnalysis.textContent = routeAnalysis.textContent.replace("La ruta óptima", "The optimal route").replace("km", "km").replace("MXN", "MXN");
+        satelliteMapSection.innerHTML = '<i class="fas fa-satellite"></i> Satellite Map';
+        satelliteMapDesc.textContent = "Visualize detailed geographic information with our high-resolution satellite map. Explore terrain features, vegetation and water resources with updated data.";
+        observationMapSection.innerHTML = '<i class="fas fa-binoculars"></i> Observation Map';
+        observationMapDesc.textContent = "Monitor environmental conditions, water resources and terrain features in real time with our interactive observation map.";
         button.innerHTML = '<i class="fas fa-language"></i> Switch to Spanish';
         currentLang = "en";
       } else {
@@ -890,24 +1228,60 @@
         resultsTitle.innerHTML = '<i class="fas fa-chart-line"></i> Resultados y Métricas';
         analysisTitle.innerHTML = '<i class="fas fa-satellite"></i> Análisis de Datos Satelitales';
         analysisText.textContent = "Nuestra plataforma integra datos de múltiples fuentes satelitales para proporcionar información detallada sobre humedad del suelo, vegetación y topografía. Utilizamos imágenes de alta resolución combinadas con algoritmos de aprendizaje automático para detectar patrones y optimizar la planificación de infraestructura.";
-        legendOptimal.textContent = "Ruta Óptima";
-        legendCurrent.textContent = "Ruta Actual";
-        legendLeak.textContent = "Zonas de Riesgo";
         routeAnalysisTitle.innerHTML = '<i class="fas fa-chart-bar"></i> Análisis de Ruta';
         routeAnalysis.textContent = routeAnalysis.textContent.replace("The optimal route", "La ruta óptima").replace("km", "km").replace("MXN", "MXN");
+        satelliteMapSection.innerHTML = '<i class="fas fa-satellite"></i> Mapa Satelital';
+        satelliteMapDesc.textContent = "Visualice información geográfica detallada con nuestro mapa satelital de alta resolución. Explore características del terreno, vegetación y recursos hídricos con datos actualizados.";
+        observationMapSection.innerHTML = '<i class="fas fa-binoculars"></i> Mapa de Observación';
+        observationMapDesc.textContent = "Monitoree en tiempo real las condiciones ambientales, recursos hídricos y características del terreno con nuestro mapa interactivo de observación.";
         button.innerHTML = '<i class="fas fa-language"></i> Cambiar a inglés';
         currentLang = "es";
       }
     }
 
-    // Inicializar el gráfico cuando la página cargue
-    window.onload = function() {
-      initChart();
+    // Funciones para mapas individuales
+    function refreshSatelliteMap() {
+      const date = document.getElementById('satellite-date').value;
+      const layer = document.getElementById('satellite-layer').value;
 
-      // Simular datos iniciales para el gráfico
-      setTimeout(() => {
-        updateChart(18.5, 24.3, 9250000, 12150000);
-      }, 1000);
+      alert(`Actualizando mapa satelital con fecha ${date} y capa ${layer}. En una implementación real, esto actualizaría el mapa.`);
+    }
+
+    function focusOnMexico() {
+      alert("Centrando mapa en México. En una implementación real, esto ajustaría la vista del mapa.");
+    }
+
+    // Función para pantalla completa
+    function toggleFullscreen(sectionId) {
+      const section = document.getElementById(sectionId);
+
+      if (!document.fullscreenElement) {
+        if (section.requestFullscreen) {
+          section.requestFullscreen();
+        } else if (section.mozRequestFullScreen) {
+          section.mozRequestFullScreen();
+        } else if (section.webkitRequestFullscreen) {
+          section.webkitRequestFullscreen();
+        } else if (section.msRequestFullscreen) {
+          section.msRequestFullscreen();
+        }
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+          document.mozCancelFullScreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) {
+          document.msExitFullscreen();
+        }
+      }
+    }
+
+    // Inicializar cuando la página cargue
+    window.onload = function() {
+      // Calcular irrigación inicial
+      calculateIrrigation();
     };
   </script>
 </body>
